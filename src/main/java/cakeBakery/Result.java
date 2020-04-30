@@ -11,8 +11,8 @@ import javax.persistence.Id;
 public class Result {
 
     private @Id
-    @GeneratedValue
-    Long id;
+//    @GeneratedValue
+     Long id;
     private String count;
 
     public Result(Long id, String name) {

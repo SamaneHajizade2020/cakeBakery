@@ -36,18 +36,18 @@ public class RecipeController {
         this.inventoryRepository = inventoryRepository;
     }
 
-    //@Autowired(required=true)
-    //ResultRepository resultRepository;
+    @Autowired(required=true)
+    ResultRepository resultRepository;
 
     //@Autowired(required=true)
     //ResultOptionRepository optionRepository;
 
-/*    public RecipeController(RecipeRepository recipeRepository, IngredientRepository ingredientRepository, ResultRepository resultRepository, ResultOptionRepository optionRepository) {
+    public RecipeController(RecipeRepository recipeRepository, IngredientRepository ingredientRepository, ResultRepository resultRepository) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.resultRepository = resultRepository;
-        this.optionRepository = optionRepository;
-    }*/
+       // this.optionRepository = optionRepository;
+    }
 
     public RecipeController(RecipeRepository recipeRepository) {
         this.recipeRepository = recipeRepository;
@@ -175,9 +175,7 @@ public class RecipeController {
     @RequestMapping(value = "/recipes/get-count-by-recipe", method = RequestMethod.GET)
     public ResponseEntity<Object> getCountByRecipe() {
        getCountByRecipe(recipeRepository.findAll(), inventoryRepository.findAll());
-       // resultRepository.findAll();
-       // return new ResponseEntity<>(resultRepository.findAll(), HttpStatus.CREATED);
-        return new ResponseEntity<>( "", HttpStatus.CREATED);
+        return new ResponseEntity<>(resultRepository.findAll(), HttpStatus.CREATED);
     }
 
 
@@ -189,8 +187,6 @@ public class RecipeController {
 //    }
 
    public void getCountByRecipe(Collection<Recipe> recipes, Collection<Inventory> inventories) {
-      // logForRecipe(recipes);
-       //logForIngredient(inventory);
        for (Recipe recipe : recipes) {
            log.info( recipe.getRecipeId() + " " + recipe.getName() + recipe.getInstructions() + " " + recipe.getIngredients().size());
            ArrayList<Ingredient> resultArr= new ArrayList<>();
@@ -198,12 +194,9 @@ public class RecipeController {
            ArrayList<GradientInventory> resultIngredientInventory= new ArrayList<>();
 
            List<Ingredient> ingredientsOfRecipe = recipe.getIngredients();
-           //List<Ingredient> ingredients1 = recipe.getIngredients();
            for (Ingredient ingredient : ingredientsOfRecipe) {
                log.info( " " + ingredient.getName() + " " + ingredient.getQuantity());
            }
-
-           //logForRecipe(recipe);
 
            List<Inventory> ingredientOfInventoriesWhichAreInThisRecipe = inventories.stream()
                    .filter(os -> ingredientsOfRecipe.stream()                    // filter
@@ -211,8 +204,10 @@ public class RecipeController {
                                    os.getName().equals(ns.getName())))
                    .collect(Collectors.toList());
 
-           log.info("Ingredient that are in this recipe:" + ingredientOfInventoriesWhichAreInThisRecipe.size());
-           logForInventories(ingredientOfInventoriesWhichAreInThisRecipe);
+           log.info("Inventory which are used in this recipe:" + ingredientOfInventoriesWhichAreInThisRecipe.size());
+           for (Inventory ingredient : ingredientOfInventoriesWhichAreInThisRecipe) {
+               log.info( " " + ingredient.getName() + " " + ingredient.getQuantity());
+           }
 
            //resultArr.addAll(ingredientsOfRecipe);
            for (Ingredient ingredient : ingredientsOfRecipe) {
@@ -230,12 +225,14 @@ public class RecipeController {
            }
 
            List<Ingredient> list = divOfQuantityForSameIngredientAndInventory(resultIngredientInventory);
-           logForIngredient(list);
+           for (Ingredient ingredient : list) {
+               log.info( " " + ingredient.getName() + " " + ingredient.getQuantity());
+           }
 
            Integer quantity =  findMinInList(list);
-           log.info("min by comprator" + quantity);
+           log.info("min by Comparator" + quantity);
 
-           //resultRepository.save(new Result(Long.valueOf(quantity)));
+           resultRepository.save(new Result(recipe.getRecipeId(), String.valueOf(quantity)));
                  //  .put(String.valueOf(new Random().nextInt()),
                    //new Result(String.valueOf(new Random().nextInt()), String.valueOf(quantity)));
        }
@@ -249,27 +246,9 @@ public class RecipeController {
         }
     }
 
-    private void logForRecipe(Collection<Recipe> recipes) {
-        System.out.printf("size of recipe" + recipes.size() + " " );
-        for (Recipe recipe : recipes) {
-            log.info( recipe.getRecipeId() + " " + recipe.getName() + recipe.getInstructions() + " " + recipe.getIngredients().size());
-            List<Ingredient> ingredients1 = recipe.getIngredients();
-            for (Ingredient ingredient : ingredients1) {
-                log.info( " " + ingredient.getName() + " " + ingredient.getQuantity());
-            }
-        }
-    }
-
     private void logForIngredient(Collection<Ingredient> ingredients) {
         System.out.printf("Size of ing" + ingredients.size());
         for (Ingredient ingredient : ingredients) {
-            log.info( " " + ingredient.getName() + " " + ingredient.getQuantity());
-        }
-    }
-
-    private void logForInventories(Collection<Inventory> inventories) {
-        System.out.printf("Size of ing" + inventories.size());
-        for (Inventory ingredient : inventories) {
             log.info( " " + ingredient.getName() + " " + ingredient.getQuantity());
         }
     }
