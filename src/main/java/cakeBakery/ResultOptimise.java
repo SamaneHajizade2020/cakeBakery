@@ -15,16 +15,15 @@ public class ResultOptimise {
     @GeneratedValue
     private @Id
     Long id;
+
+    @JsonIgnore()
     @OneToMany(targetEntity= Result.class, fetch=FetchType.EAGER, cascade = {CascadeType.MERGE})
     private List<Result> recipes;
+
     private String recipeCount;
     private String unusedInventoryCount;
 
-    public ResultOptimise(Long id, List<Result> results, String recipeCount, String unusedInventoryCount) {
-        this.id = id;
-        this.recipes = results;
-        this.recipeCount = recipeCount;
-        this.unusedInventoryCount = unusedInventoryCount;
+    public ResultOptimise() {
     }
 
     public ResultOptimise(List<Result> results, String recipeCount, String unusedInventoryCount) {

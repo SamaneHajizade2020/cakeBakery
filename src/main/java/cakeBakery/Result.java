@@ -11,16 +11,12 @@ import javax.persistence.Id;
 public class Result {
 
     private @Id
-//    @GeneratedValue
      Long id;
     private String count;
 
     public Result(Long id, String name) {
         this.id = id;
         this.count = name;
-    }
-
-    public Result(Long quantity) {
     }
 
     public Result() {
