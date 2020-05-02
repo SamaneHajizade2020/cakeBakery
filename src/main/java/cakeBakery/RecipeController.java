@@ -263,17 +263,118 @@ public class RecipeController {
     }
 
     public ResultOptimise getOptimiseCountByRecipe_(List<Recipe> recipes, List<Inventory> inventories) {
-        System.out.printf("size of recipe" + recipes.size() + " ");
-
-        Integer integers = resultForEachRecipe(recipes, inventories);
-        log.info("unusedInventoryCount: " + integers);
-
+        Integer unusedInventoryCount = resultForEachRecipe(recipes, inventories);
         List<Result> result = resultRepository.findAll().stream().collect(Collectors.toList());
         Integer recipeCount = result.stream()
                 .map(x -> Integer.valueOf(x.getCount())).reduce(0, Integer::sum);
 
-        log.info("sumOfRecipe.toString: " + recipeCount.toString());
-        return resultOptimiseRepo.saveAndFlush(new ResultOptimise(result, recipeCount.toString(), String.valueOf(integers)));
+        return resultOptimiseRepo.saveAndFlush(new ResultOptimise(result, recipeCount.toString(), String.valueOf(unusedInventoryCount)));
+    }
+
+    private Integer resultForEachRecipe(List<Recipe> recipes, List<Inventory> inventories){
+        ArrayList<IngredientInventory> listResultGradientInventory = new ArrayList<>();
+
+        log.info("size of recipe" + recipes.size() + " ");
+        for (Recipe recipe : recipes) {
+            ArrayList<IngredientInventory> resultIngredientInventory = new ArrayList<>();
+            ArrayList<IngredientInventory> listOfRemain = new ArrayList<>();
+            boolean flag = true;
+
+            log.info(recipe.getRecipeId() + " " + recipe.getName() + recipe.getInstructions() + " " + recipe.getIngredients().size());
+            List<Ingredient> ingredientsOfRecipe = recipe.getIngredients();
+
+            for (int i = 0; i < ingredientsOfRecipe.size(); i++) {
+                System.out.println("i:" + i);
+                if (!listResultGradientInventory.isEmpty() && (i < listResultGradientInventory.size())) {
+                    for (IngredientInventory gradientInventory : listResultGradientInventory) {
+                        if (gradientInventory.getName().equalsIgnoreCase(ingredientsOfRecipe.get(i).getName()) &&
+                                (gradientInventory.getQuantity().compareTo(ingredientsOfRecipe.get(i).getQuantity()) < 1)) {
+                            flag = false;
+                            System.out.println(".............................." + gradientInventory.getName() + " " + ingredientsOfRecipe.get(i).getQuantity() + "flag: "+  String.valueOf(false));
+                        }
+                    }
+                }
+            }
+
+            if (flag == true) {
+                List<Inventory> neededInventoriesForRecipe = inventories.stream()
+                        .filter(os -> ingredientsOfRecipe.stream()                    // filter
+                                .anyMatch(ns ->                                  // compare both
+                                        os.getName().equals(ns.getName())))
+                        .collect(Collectors.toList());
+
+                for (Ingredient ingredient : ingredientsOfRecipe) {
+                    resultIngredientInventory.add(new IngredientInventory(ingredient.getId(), ingredient.getName(), ingredient.getQuantity()));
+                    log.info(" listIngredientInventory in recipe.ingredients: " + ingredient.getName() + " " + ingredient.getQuantity());
+                }
+
+                for (Inventory Inventory : neededInventoriesForRecipe) {
+                    resultIngredientInventory.add(new IngredientInventory(Inventory.getId(), Inventory.getName(), Inventory.getQuantity()));
+                    log.info(" listIngredientInventory in inventory: " + Inventory.getName() + " " + Inventory.getQuantity());
+                }
+
+                List<IngredientInventory> listDivision = divOfQuantityForSameInventory(resultIngredientInventory);
+                for (IngredientInventory gradientInventory : listDivision) {
+                    log.info("Inventories after division to Ingredients show how many recipe we can make by this inventory: " + gradientInventory.getName() + " " + gradientInventory.getQuantity());
+                }
+
+                Integer minInventory = listDivision.stream()
+                        .min(Comparator.comparing(IngredientInventory::getQuantity))
+                        .get().getQuantity();
+                log.info("min Inventory by comparator" + minInventory);
+
+
+                for (IngredientInventory gradientInventory : listDivision) {
+                    Integer remain = gradientInventory.getQuantity() - minInventory;
+                    listOfRemain.add(new IngredientInventory(gradientInventory.getName(), remain));
+                }
+
+                log.info(String.valueOf(listOfRemain.size()));
+                for (IngredientInventory gradientInventory : listOfRemain) {
+                    log.info("Remain of inventory:" +  gradientInventory.getName() + " " + gradientInventory.getQuantity());
+                }
+
+//                List<IngredientInventory> listx = ifContainSameElement_(inventories, listOfRemain);
+//                listResultGradientInventory.addAll(listx);
+
+                listResultGradientInventory.addAll(listOfRemain);
+                for (IngredientInventory ingredient : listResultGradientInventory) {
+                    log.info("Conclusion:" + ingredient.getId() + " " + ingredient.getName() + " " + ingredient.getQuantity());
+                }
+                resultRepository.save(new Result(recipe.getRecipeId(), String.valueOf(minInventory)));
+            }
+        }
+
+        List<IngredientInventory> sameGradientInventoryWithDifferentQuantity =
+                listResultGradientInventory.stream()
+                        .filter(os -> inventories.stream()                    // filter
+                                .anyMatch(ns ->                                  // compare both
+                                        (os.getName().equals(ns.getName())) && !(os.getQuantity().equals(ns.getQuantity()))))
+                        .collect(Collectors.toList());
+
+        Integer sumOfSameGradientInventoryWithDifferentQuantity = sameGradientInventoryWithDifferentQuantity.stream()
+                .map(x -> x.getQuantity()).reduce(0, Integer::sum);
+        System.out.println("Sum of all quantity in gradientInventories: " + sumOfSameGradientInventoryWithDifferentQuantity);
+
+        Set<String> collectListOfSameGradientInventoryByName = listResultGradientInventory.stream()
+                .map(IngredientInventory::getName)
+                .collect(Collectors.toSet());
+
+        List<Inventory> inventoryWhichAreNotUsed = inventories.stream()
+                .filter(GradientInventory -> !collectListOfSameGradientInventoryByName.contains(GradientInventory.getName()))
+                .collect(Collectors.toList());
+
+        System.out.println("size of unused inventories : " + inventoryWhichAreNotUsed.size());
+        for (Inventory ingredient : inventoryWhichAreNotUsed) {
+            System.out.println(ingredient.getName() + " " + ingredient.getQuantity());
+        }
+
+        Integer sumOfUnusedIngredientInventory = inventoryWhichAreNotUsed.stream()
+                .map(y -> y.getQuantity()).reduce(0, Integer::sum);
+
+        sumOfSameGradientInventoryWithDifferentQuantity += sumOfUnusedIngredientInventory;
+
+        return sumOfSameGradientInventoryWithDifferentQuantity;
     }
 
     private Integer findMinInList(List<Ingredient> list) {
@@ -291,7 +392,6 @@ public class RecipeController {
                 if ((listIngredient.get(i).getName().equalsIgnoreCase(listIngredient.get(j).getName()) && ( i !=j)
                         && (listIngredient.get(i).getQuantity()!= 0) && (listIngredient.get(j).getQuantity()!= 0)))  {
                     int divOfQuantity = ((listIngredient.get(i).getQuantity()) / (listIngredient.get(j).getQuantity()));
-                    // result.add(new Ingredient(String.valueOf(new Random().nextInt()),listIngredient.get(i).getName(), divOfQuantity));
                     gradientInventories.add(new IngredientInventory(listIngredient.get(i).getName(), divOfQuantity));
                 }
             }
@@ -306,62 +406,6 @@ public class RecipeController {
                 .map(x -> x.getQuantity())
                 .reduce(0, Integer::divideUnsigned);
 
-    }
-
-    public ArrayList<IngredientInventory> remainderForSameIngredient(List<IngredientInventory> listIngredient) {
-        ArrayList<IngredientInventory> result= new ArrayList<>();
-        for (int i = 0; i < listIngredient.size(); i++) {
-            for (int j = 0; j < i; j++) {
-                if ((listIngredient.get(i).getName().equalsIgnoreCase(listIngredient.get(j).getName()) && ( i !=j)
-                        && (listIngredient.get(i).getQuantity()!= 0) && (listIngredient.get(j).getQuantity()!= 0)))  {
-
-                    int remainOfQuantity = ((listIngredient.get(i).getQuantity()) % (listIngredient.get(j).getQuantity()));
-                    log.info("remainOfQuantity:" + remainOfQuantity);
-                    result.add(new IngredientInventory(listIngredient.get(i).getName(), remainOfQuantity));
-                }
-            }
-        }
-
-        return result;
-    }
-
-    public ArrayList<Ingredient> remainderOfQuantityForSameIngredient(List<Ingredient> listIngredient) {
-        ArrayList<Ingredient> result= new ArrayList<>();
-        for (int i = 0; i < listIngredient.size(); i++) {
-            for (int j = 0; j < i; j++) {
-                if ((listIngredient.get(i).getName().equalsIgnoreCase(listIngredient.get(j).getName()) && ( i !=j)
-                        && (listIngredient.get(i).getQuantity()!= 0) && (listIngredient.get(j).getQuantity()!= 0)))  {
-                    int remainOfQuantity = ((listIngredient.get(i).getQuantity()) % (listIngredient.get(j).getQuantity()));
-                    log.info("remainOfQuantity:" + remainOfQuantity);
-                    result.add(new Ingredient(listIngredient.get(i).getName(), remainOfQuantity));
-                }
-            }
-        }
-
-        return result;
-    }
-
-    public List<Ingredient> ifContainSameElemet(Collection<Ingredient> listIngredient, ArrayList<Ingredient> ingredients) {
-        ArrayList<Ingredient> listResult= new ArrayList<>();
-        log.info("==============ingredients size:" + ingredients.size());
-
-        for (int i = 0; i < listIngredient.size(); i++) {
-            System.out.println("i:" + i);
-            if (i < ingredients.size()) {
-                System.out.println("yes");
-                for (Ingredient ingredient : listIngredient) {
-                    if (ingredient.getName().equalsIgnoreCase(ingredients.get(i).getName())) {
-                        listResult.add(ingredients.get(i));
-                        System.out.println(".............................." + ingredient.getName() + " " + ingredients.get(i).getQuantity());
-                    }
-                }
-            }
-        }
-        System.out.println("ListResult size:" + listResult.size());
-        for (Ingredient ingredient : listResult) {
-            System.out.println(ingredient.getName() + " " + ingredient.getQuantity());
-        }
-        return listResult;
     }
 
     public List<IngredientInventory> ifContainSameElement_(Collection<Inventory> listIngredient, ArrayList<IngredientInventory> gradientInventory) {
@@ -386,167 +430,6 @@ public class RecipeController {
         }
         return listResult;
     }
-
-    private Integer resultForEachRecipe(List<Recipe> recipes, List<Inventory> inventories){
-        ArrayList<IngredientInventory> listResultGradientInventory = new ArrayList<>();
-        List<Integer> unusedInventoryCountList = new ArrayList<>();
-        Integer unusedInventoryCountResult = 0;
-
-        for (Recipe recipe : recipes) {
-            boolean flag = true;
-                ArrayList<IngredientInventory> resultIngredientInventory = new ArrayList<>();
-                String unusedInventoryCount = null;
-                Ingredient ing = new Ingredient();
-                log.info(recipe.getRecipeId() + " " + recipe.getName() + recipe.getInstructions() + " " + recipe.getIngredients().size());
-
-                List<Ingredient> ingredientsOfRecipe = recipe.getIngredients();
-                for (Ingredient ingredient : ingredientsOfRecipe) {
-                    log.info("ingredientsOfRecipe: " + ingredient.getName() + " " + ingredient.getQuantity());
-                }
-
-                for (int i = 0; i < ingredientsOfRecipe.size(); i++) {
-                    System.out.println("i:" + i);
-                    if (!listResultGradientInventory.isEmpty() && (i < listResultGradientInventory.size())) {
-                        for (IngredientInventory gradientInventory : listResultGradientInventory) {
-                            if (gradientInventory.getName().equalsIgnoreCase(ingredientsOfRecipe.get(i).getName()) &&
-                                    (gradientInventory.getQuantity().compareTo(ingredientsOfRecipe.get(i).getQuantity()) < 1)) {
-                                System.out.println(".............................." + gradientInventory.getName() + " " + ingredientsOfRecipe.get(i).getQuantity());
-                                //ng = new Ingredient(ingredientsOfRecipe.get(i).getName(), ingredientsOfRecipe.get(i).getQuantity());
-                                System.out.println(unusedInventoryCount);
-                                unusedInventoryCount += unusedInventoryCount;
-                                log.info("Before  unusedInventoryCountList: " + unusedInventoryCountList);
-                                unusedInventoryCountList.add(ingredientsOfRecipe.get(i).getQuantity());
-                                log.info("After unusedInventoryCountList: " + unusedInventoryCountList);
-                                flag = false;
-                            }
-                        }
-                    }
-
-                }
-
-                if (flag == true) {
-                    List<Inventory> neededIngredientsForRecipe = inventories.stream()
-                            .filter(os -> ingredientsOfRecipe.stream()                    // filter
-                                    .anyMatch(ns ->                                  // compare both
-                                            os.getName().equals(ns.getName())))
-                            .collect(Collectors.toList());
-
-                    log.info("Inventories that are needed for this recipe:" + neededIngredientsForRecipe.size());
-                    // logForIngredient(neededIngredientsForRecipe);
-                    for (Inventory ingredient : neededIngredientsForRecipe) {
-                        log.info(" " + ingredient.getName() + " " + ingredient.getQuantity());
-                    }
-
-                    for (Ingredient ingredient : ingredientsOfRecipe) {
-                        resultIngredientInventory.add(new IngredientInventory(ingredient.getId(), ingredient.getName(), ingredient.getQuantity()));
-                        log.info(" listIngredientInventory in recipe.ingredients: " + ingredient.getName() + " " + ingredient.getQuantity());
-                    }
-
-                    for (Inventory Inventory : neededIngredientsForRecipe) {
-                        resultIngredientInventory.add(new IngredientInventory(Inventory.getId(), Inventory.getName(), Inventory.getQuantity()));
-                        log.info(" listIngredientInventory in inventory: " + Inventory.getName() + " " + Inventory.getQuantity());
-                        //}
-                    }
-
-                    //doeslistGradientInventoryContainInventory(listResultGradientInventory, neededIngredientsForRecipe);
-
-                    log.info("ResultIngredientInventory :" + resultIngredientInventory.size());
-                    for (IngredientInventory gradientInventory : resultIngredientInventory) {
-                        log.info(" " + gradientInventory.getName() + " " + gradientInventory.getQuantity());
-                    }
-
-                    List<IngredientInventory> listDivision = divOfQuantityForSameInventory(resultIngredientInventory);
-                    // List<Ingredient> list = divOfQuantityForSameIngredient(resultArr);
-                    for (IngredientInventory gradientInventory : listDivision) {
-                        log.info("Inventories after division to Ingredients: " + gradientInventory.getName() + " " + gradientInventory.getQuantity());
-                    }
-
-                    Integer minInventory = listDivision.stream()
-                            .min(Comparator.comparing(IngredientInventory::getQuantity))
-                            .get().getQuantity();
-                    log.info("min Inventory by comparator" + minInventory);
-
-                    ArrayList<IngredientInventory> listOfRemain = new ArrayList<>();
-                    for (IngredientInventory gradientInventory : listDivision) {
-                        Integer quantity = gradientInventory.getQuantity();
-                        Integer r = quantity-minInventory;
-                        if(r > 0){
-                        resultIngredientInventory.add(new IngredientInventory(gradientInventory.getName(), r));
-                        resultIngredientInventory.remove(gradientInventory);
-                            resultIngredientInventory.remove(gradientInventory.getId());
-                        }
-                        unusedInventoryCountList.add(r);
-                        log.info("After unusedInventoryCountList: " + unusedInventoryCountList);
-                        listOfRemain.add(new IngredientInventory(gradientInventory.getName(), r));
-                    }
-
-                    log.info(String.valueOf(listOfRemain.size()));
-                    for (IngredientInventory gradientInventory : listOfRemain) {
-                        log.info("listOfRemain:" +  gradientInventory.getName() + " " + gradientInventory.getQuantity());
-                    }
-                    for (IngredientInventory gradientInventory : resultIngredientInventory) {
-                        log.info(String.valueOf(resultIngredientInventory.size()));
-                        log.info("resultIngredientInventory:" +  gradientInventory.getName() + " " + gradientInventory.getQuantity());
-                    }
-
-
-
-                   // ArrayList<GradientInventory> listOfRemain = remainderForSameIngredient(resultIngredientInventory);
-                    List<IngredientInventory> listx = ifContainSameElement_(inventories, listOfRemain);
-                    for (IngredientInventory gradientInventory : listx) {
-                        log.info(String.valueOf(resultIngredientInventory.size()));
-                        log.info("listx:" +  gradientInventory.getName() + " " + gradientInventory.getQuantity());
-                    }
-
-                    listResultGradientInventory.addAll(listx);
-                    for (IngredientInventory ingredient : listResultGradientInventory) {
-                        log.info("Conclusion:" + ingredient.getId() + " " + ingredient.getName() + " " + ingredient.getQuantity());
-                    }
-                    resultRepository.save(new Result(recipe.getRecipeId(), String.valueOf(minInventory)));
-                    //resultRepository.put(String.valueOf(new Random().nextInt()), new Result(String.valueOf(new Random().nextInt()), String.valueOf(quantity)));
-                }
-
-    }
-
-        List<IngredientInventory> result = listResultGradientInventory.stream()
-                .filter(os -> inventories.stream()                    // filter
-                        .anyMatch(ns ->                                  // compare both
-                                (os.getName().equals(ns.getName())) && !(os.getQuantity().equals(ns.getQuantity()))))
-                .collect(Collectors.toList());
-
-        //todo: remove
-        System.out.println("size of gradientInventories : " + result.size());
-        for (IngredientInventory ingredient : result) {
-            System.out.println(ingredient.getName() + " " + ingredient.getQuantity());
-            unusedInventoryCountResult =+ unusedInventoryCountResult;
-        }
-
-        Integer reduce = result.stream()
-                .map(x -> x.getQuantity()).reduce(0, Integer::sum);
-        System.out.println("Sum of all quantity in gradientInventories: " + reduce);
-
-
-        Set<String> collect = listResultGradientInventory.stream()
-                .map(IngredientInventory::getName)
-                .collect(Collectors.toSet());
-
-        List<Inventory> collect2 = inventories.stream()
-                .filter(GradientInventory -> !collect.contains(GradientInventory.getName()))
-                .collect(Collectors.toList());
-
-        System.out.println("size of unused inventories : " + collect2.size());
-        for (Inventory ingredient : collect2) {
-            System.out.println(ingredient.getName() + " " + ingredient.getQuantity());
-            unusedInventoryCountResult =+ unusedInventoryCountResult;
-        }
-
-        Integer reduceX = collect2.stream()
-                .map(y -> y.getQuantity()).reduce(0, Integer::sum);
-        reduce += reduceX;
-
-        return reduce;
-    }
-
 
     class IngredientInventory {
         private @Id
