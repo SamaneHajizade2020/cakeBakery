@@ -45,17 +45,7 @@ public class InventoryController {
     @RequestMapping(value = "/inventory/{id}", method = RequestMethod.PUT)
     public ResponseEntity<Object> replaceInventory(@RequestBody Inventory newInventory, @PathVariable Long id) {
         Inventory inventory = replaceInventoryEach(newInventory, id);
-/*        return repository.findById(id)
-                .map(Inventory -> {
-                    Inventory.setName(newInventory.getName());
-                    Inventory.setQuantity(newInventory.getQuantity());
-                    return repository.save(Inventory);
-                })
-                .orElseGet(() -> {
-                    newInventory.setId(id);
-                    return repository.save(newInventory);
-                });*/
-        return new ResponseEntity<>("Product is created successfully", HttpStatus.CREATED);
+        return new ResponseEntity<>(inventory, HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/inventory/fill", method = RequestMethod.POST)
@@ -90,6 +80,19 @@ public class InventoryController {
         if(InventoryId.isPresent())
         repository.deleteById(id);
         return new ResponseEntity<>("Product is deleted successsfully", HttpStatus.OK);
+    }
+
+    private Inventory replaceInventoryEach(Inventory newInventory, Long id){
+        return repository.findById(id)
+                .map(Inventory -> {
+                    Inventory.setName(newInventory.getName());
+                    Inventory.setQuantity(newInventory.getQuantity());
+                    return repository.save(Inventory);
+                })
+                .orElseGet(() -> {
+                    newInventory.setId(id);
+                    return repository.save(newInventory);
+                });
     }
 
     public void controlInventoryQuantity() {
@@ -167,17 +170,5 @@ public class InventoryController {
         return flag;
     }
 
-    private Inventory replaceInventoryEach(Inventory newInventory, Long id){
-        return repository.findById(id)
-                .map(Inventory -> {
-                    Inventory.setName(newInventory.getName());
-                    Inventory.setQuantity(newInventory.getQuantity());
-                    return repository.save(Inventory);
-                })
-                .orElseGet(() -> {
-                    newInventory.setId(id);
-                    return repository.save(newInventory);
-                });
-    }
 }
 

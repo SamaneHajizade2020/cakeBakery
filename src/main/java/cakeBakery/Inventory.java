@@ -17,22 +17,19 @@ public class Inventory {
     private  String name; // name, e.g. "Sugar"
     private  Integer quantity; // how much of this ingredient? Must be > 0
 
-/*    @ManyToOne
-    @JoinColumn(name="recipeId")*/
-
-    @ManyToOne
-    @JoinColumn(name = "Id_ingredient")
-    private Recipe recipe;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "Id_ingredient", nullable = true)
-    public Recipe getRecipe() {
-        return recipe;
-    }
-
-    public void setRecipe(Recipe recipe) {
-        this.recipe = recipe;
-    }
+//    @ManyToOne
+//    @JoinColumn(name = "Id_ingredient")
+//    private Recipe recipe;
+//
+//    @ManyToOne(optional = false)
+//    @JoinColumn(name = "Id_ingredient", nullable = true)
+//    public Recipe getRecipe() {
+//        return recipe;
+//    }
+//
+//    public void setRecipe(Recipe recipe) {
+//        this.recipe = recipe;
+//    }
 
     public Inventory( String name, Integer quantity) {
         this.name = name;

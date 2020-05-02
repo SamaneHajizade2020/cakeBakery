@@ -28,24 +28,15 @@ class LoadDatabase {
 
 */
 
-//    @Bean
-//    CommandLineRunner initDatabase(EmployeeRepository repository, IngredientRepository ingredientRepository) {
-//        return args -> {
-//             //log.info("Preloading " + repository.save(new Employee("Bilbo Baggins", "burglar")));
-//            log.info("Preloading " + ingredientRepository.save(new Ingredient("Suger", 1)));
-//            log.info("Preloading " + ingredientRepository.save(new Ingredient("vanilla", 2)));
-//            //   log.info("Preloading " + repository.save(new Employee("Frodo Baggins", "thief")));
-//        };
-//    }
 
     @Bean
     CommandLineRunner initDatabase(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
         Ingredient suger = new Ingredient("Suger", 1);
         Ingredient vanilla = new Ingredient("vanilla", 2);
-
-        List<Ingredient> ingredients = new ArrayList<>();
-        ingredients.add(new Ingredient("baking powder", 2));
-        ingredients.add(new Ingredient("egg", 2));
+//
+//        List<Ingredient> ingredients = new ArrayList<>();
+//        ingredients.add(new Ingredient("baking powder", 2));
+//        ingredients.add(new Ingredient("egg", 2));
 
         List<Ingredient> ingredients_ = new ArrayList<>();
         ingredients_.add(suger);
@@ -62,8 +53,6 @@ class LoadDatabase {
             log.info("Preloading " + ingredientRepository.saveAndFlush(vanilla));
             log.info("Preloading " + recipeRepository.save(recipe));
 
-            log.info("ID=" +  ingredientRepository.findById(Long.valueOf(2)));
-            log.info("Foreign Key Cart ID=" +  ingredient1.getRecipe());
           // log.info("Preloading " + recipeRepository.save(new Recipe("Choklate Cake", "Mix choklate & floar", ingredients)));
         };
     }

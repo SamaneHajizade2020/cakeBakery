@@ -14,15 +14,10 @@ public class Recipe {
     @Id
     @GeneratedValue
     Long recipeId;
-  //  private Long id; // > 0
     private String name;  // name of the recipe
     private String instructions;  // instructions & howto
 
     @OneToMany(targetEntity= Ingredient.class, fetch=FetchType.EAGER, cascade = {CascadeType.MERGE})
-    //@OneToMany(targetEntity=Ingredient.class, fetch=FetchType.EAGER)
-   // @Cascade({SAVE_UPDATE, EVICT, DELETE, DELETE_ORPHAN})
-
- //   @OneToMany(mappedBy = "recipe", orphanRemoval = true, cascade = CascadeType.MERGE)
     private List<Ingredient> ingredients; // list of ingredients
 
 
