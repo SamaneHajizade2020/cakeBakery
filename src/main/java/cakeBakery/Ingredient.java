@@ -14,9 +14,10 @@ public class Ingredient {
     //private String id;
 
     private @Id
-    @GeneratedValue
+    
     @JsonIgnore()
     Long id;
+
     private  String name; // name, e.g. "Sugar"
     private  Integer quantity; // how much of this ingredient? Must be > 0
 
