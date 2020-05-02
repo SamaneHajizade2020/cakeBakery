@@ -2,6 +2,7 @@ package cakeBakery;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.Generated;
 
 import javax.persistence.*;
 
@@ -14,7 +15,7 @@ public class Ingredient {
     //private String id;
 
     private @Id
-    
+    @GeneratedValue
     @JsonIgnore()
     Long id;
 
