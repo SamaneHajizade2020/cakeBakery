@@ -11,9 +11,6 @@ import javax.persistence.*;
 @Access( AccessType.FIELD )
 public class Ingredient {
 
-    //@JsonIgnore()
-    //private String id;
-
     private @Id
     @GeneratedValue
     @JsonIgnore()
@@ -21,9 +18,6 @@ public class Ingredient {
 
     private  String name; // name, e.g. "Sugar"
     private  Integer quantity; // how much of this ingredient? Must be > 0
-
-/*    @ManyToOne
-    @JoinColumn(name="recipeId")*/
 
     @ManyToOne
     @JoinColumn(name = "Id_ingredient")
