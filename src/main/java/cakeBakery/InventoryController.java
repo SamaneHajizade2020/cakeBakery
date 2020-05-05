@@ -94,42 +94,34 @@ public class InventoryController {
     }
 
     public void controlInventoryQuantity() {
-        List<Inventory> newListOFInventorys = new ArrayList<>();
-        List<Inventory> removableListOFDuplicateInventory = new ArrayList<>();
-        List<Inventory> Inventorys = repository.findAll();
-
-        List<Inventory> listDuplicateInventory = listDuplicateInventory(Inventorys);
-        log.info("Size of Duplicate list:" + listDuplicateInventory.size());
+        ArrayList<Inventory> newListOFInventories = new ArrayList<>();
+        List<Inventory> listDuplicateInventory = listDuplicateInventory(repository.findAll());
+        log.info("Size of list with Duplicate name :" + listDuplicateInventory.size());
 
         if (listDuplicateInventory.size() > 0) {
-            for (Inventory inventory : listDuplicateInventory) {
-                log.info("Inventory in duplicate List: " + inventory.getId() + inventory.getName() + inventory.getQuantity());
-
-//                Inventory newInventory = new Inventory(inventory.getName(), sumOfSameQuantity(listDuplicateInventory, inventory));
-//                log.info("newInventory: " + newInventory.getId() + newInventory.getName() + newInventory.getQuantity());
-
-                Inventory newInventoryInTable = repository.save(new Inventory(inventory.getName(), sumOfSameQuantity(listDuplicateInventory, inventory)));
-//                log.info("newInventoryInTable: " + newInventoryInTable.getId() + newInventoryInTable.getName() + newInventoryInTable.getQuantity());
-
-                newListOFInventorys.add(newInventoryInTable);
-                for (Inventory gred : newListOFInventorys) {
-                    log.info("gred in newListOFInventorys: " + gred.getId() + gred.getName() + gred.getQuantity());
-                }
-                log.info("sizeOfNewListOFInventory: " + newListOFInventorys.size()
-                        + " " + "Remove duplicate from new list: " + removeDuplicateInventory(newListOFInventorys));
-                removableListOFDuplicateInventory.add(inventory);
-            }
-
-            for (Inventory Inventory : listDuplicateInventory) {
-                log.info("Inventory that will be removed: " + Inventory.getId() + Inventory.getName() + Inventory.getQuantity());
-                repository.deleteById(Inventory.getId());
-                repository.delete(Inventory);
-            }
+            removeSameInventory(listDuplicateInventory, newListOFInventories);
         }
     }
 
-    public List<Inventory> listDuplicateInventory(Collection<Inventory> Inventorys) {
-        return Inventorys.stream()
+    private void removeSameInventory(List<Inventory> listDuplicateInventory, ArrayList<Inventory> newListOFInventorys) {
+        for (Inventory inventory : listDuplicateInventory) {
+            log.info("Inventory in duplicate List: " + inventory.getId() + inventory.getName() + inventory.getQuantity());
+
+            Inventory newInventoryInTable = repository.save(new Inventory(inventory.getName(), sumOfSameQuantity(listDuplicateInventory, inventory)));
+            newListOFInventorys.add(newInventoryInTable);
+
+            for (Inventory gred : newListOFInventorys) {
+                log.info("Inventory in newListOFInventories: " + gred.getId() + gred.getName() + gred.getQuantity());
+            }
+            log.info("sizeOfNewListOFInventory: " + newListOFInventorys.size()
+                    + " " + "Remove duplicate from new list: " + removeDuplicateInventory(newListOFInventorys));
+            repository.deleteById(inventory.getId());
+            repository.delete(inventory);
+        }
+    }
+
+    public List<Inventory> listDuplicateInventory(Collection<Inventory> Inventories) {
+        return Inventories.stream()
                 .collect(Collectors.groupingBy(Inventory:: getName))
                 .entrySet().stream()
                 .filter(e -> e.getValue().size() > 1)
@@ -140,7 +132,6 @@ public class InventoryController {
     public Integer sumOfSameQuantity(List<Inventory> Inventorys, Inventory Inventory){
         return Inventorys.stream()
                 .filter(customer -> Inventory.getName().equals(customer.getName())).map(x -> x.getQuantity()).reduce(0, Integer::sum);
-
     }
 
     public boolean removeDuplicateInventory(List<Inventory> listInventory) {
@@ -152,7 +143,6 @@ public class InventoryController {
                         (listInventory.get(i).getQuantity().compareTo(listInventory.get(j).getQuantity())==0)
                         && (i!=j)){
                     Inventory Inventory = listInventory.get(i);
-                    log.info("It want to be removed: " + Inventory.getId() + Inventory.getName() + Inventory.getQuantity());
 
                     if(Inventory.getId() != null){
                         log.info("Inventory Id to be remover:" + Inventory.getId());
