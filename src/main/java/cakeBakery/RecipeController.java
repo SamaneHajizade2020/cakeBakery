@@ -167,7 +167,6 @@ public class RecipeController {
             for (ResultOptimise resultOptimise : all) {
                 resultOptimiseRepo.delete(resultOptimise);
             }
-            resultRepository.findAll();
         }
         if (resultRepository.findAll().size() != 0){
             List<Result> all = resultRepository.findAll();
@@ -224,11 +223,6 @@ public class RecipeController {
 
            for (Inventory ingredient : inventoriesWhichAreTheSameAsIngredientsOfRecipe) {
                BothIngredientAndInventory.add(new IngredientInventory(ingredient.getId(), ingredient.getName(), ingredient.getQuantity()));
-           }
-
-           log.info("resultArr:" + BothIngredientAndInventory.size());
-           for (IngredientInventory gradientInventory : BothIngredientAndInventory) {
-               log.info( " " + gradientInventory.getName() + " " + gradientInventory.getQuantity());
            }
 
            List<Ingredient> possibleAmountOfRecipeByThisInventory =
