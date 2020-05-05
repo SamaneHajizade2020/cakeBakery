@@ -42,12 +42,6 @@ public class InventoryController {
         return new ResponseEntity<>("Product is created successfully", HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/inventory/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Object> replaceInventory(@RequestBody Inventory newInventory, @PathVariable Long id) {
-        Inventory inventory = replaceInventoryEach(newInventory, id);
-        return new ResponseEntity<>(inventory, HttpStatus.CREATED);
-    }
-
     @RequestMapping(value = "/inventory/fill", method = RequestMethod.POST)
     public ResponseEntity<Object> createInventory(@RequestBody ArrayList<Inventory> Inventorys) {
         for (Inventory Inventory : Inventorys) {
@@ -70,27 +64,6 @@ public class InventoryController {
             repository.delete(Inventory);
         }
         return new ResponseEntity<>("Product is deleted successsfully", HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/inventory/delete", method = RequestMethod.DELETE)
-    public ResponseEntity<Object> delete(@PathVariable("id") Long id) {
-        Optional<Inventory> InventoryId = repository.findById(Long.valueOf(id));
-        if(InventoryId.isPresent())
-        repository.deleteById(id);
-        return new ResponseEntity<>("Product is deleted successsfully", HttpStatus.OK);
-    }
-
-    private Inventory replaceInventoryEach(Inventory newInventory, Long id){
-        return repository.findById(id)
-                .map(Inventory -> {
-                    Inventory.setName(newInventory.getName());
-                    Inventory.setQuantity(newInventory.getQuantity());
-                    return repository.save(Inventory);
-                })
-                .orElseGet(() -> {
-                    newInventory.setId(id);
-                    return repository.save(newInventory);
-                });
     }
 
     public void controlInventoryQuantity() {
