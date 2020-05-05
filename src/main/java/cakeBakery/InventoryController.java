@@ -97,7 +97,6 @@ public class InventoryController {
         ArrayList<Inventory> newListOFInventories = new ArrayList<>();
         List<Inventory> listDuplicateInventory = listDuplicateInventory(repository.findAll());
         log.info("Size of list with Duplicate name :" + listDuplicateInventory.size());
-
         if (listDuplicateInventory.size() > 0) {
             removeSameInventory(listDuplicateInventory, newListOFInventories);
         }
@@ -157,6 +156,5 @@ public class InventoryController {
         }
         return flag;
     }
-
 }
 
