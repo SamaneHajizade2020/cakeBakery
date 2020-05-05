@@ -55,12 +55,10 @@ public class InventoryController {
                 return  new ResponseEntity<>("Rejected cause of zero or negative quantity", HttpStatus.NOT_ACCEPTABLE);
             }
         }
-
         for (Inventory Inventory : Inventorys) {
             repository.save(Inventory);
             log.info("Inventory that is added to Inventorys list: "  + Inventory.getId() + Inventory.getName() + Inventory.getQuantity());
         }
-
         controlInventoryQuantity();
         return new ResponseEntity<>("Product is created successfully", HttpStatus.CREATED);
     }
@@ -107,11 +105,11 @@ public class InventoryController {
             for (Inventory inventory : listDuplicateInventory) {
                 log.info("Inventory in duplicate List: " + inventory.getId() + inventory.getName() + inventory.getQuantity());
 
-                Inventory newInventory = new Inventory(inventory.getName(), sumOfSameQuantity(listDuplicateInventory, inventory));
-                log.info("newInventory: " + newInventory.getId() + newInventory.getName() + newInventory.getQuantity());
+//                Inventory newInventory = new Inventory(inventory.getName(), sumOfSameQuantity(listDuplicateInventory, inventory));
+//                log.info("newInventory: " + newInventory.getId() + newInventory.getName() + newInventory.getQuantity());
 
-                Inventory newInventoryInTable = repository.save(new Inventory(newInventory.getName(), newInventory.getQuantity()));
-                log.info("newInventoryInTable: " + newInventoryInTable.getId() + newInventoryInTable.getName() + newInventoryInTable.getQuantity());
+                Inventory newInventoryInTable = repository.save(new Inventory(inventory.getName(), sumOfSameQuantity(listDuplicateInventory, inventory)));
+//                log.info("newInventoryInTable: " + newInventoryInTable.getId() + newInventoryInTable.getName() + newInventoryInTable.getQuantity());
 
                 newListOFInventorys.add(newInventoryInTable);
                 for (Inventory gred : newListOFInventorys) {

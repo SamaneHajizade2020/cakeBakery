@@ -102,7 +102,7 @@ public class RecipeController {
     }
 
     @RequestMapping(value = "/recipes/create/all", method = RequestMethod.POST)
-    public ResponseEntity<Object> createRecipis(@RequestBody List<Recipe> recipeis) {
+    public ResponseEntity<Object> createRecipes(@RequestBody List<Recipe> recipeis) {
         for (Recipe recipe : recipeis) {
         List<Ingredient> ingredients = recipe.getIngredients();
         for (Ingredient ingredient : ingredients) {
@@ -377,13 +377,6 @@ public class RecipeController {
         return sumOfSameGradientInventoryWithDifferentQuantity;
     }
 
-    private Integer findMinInList(List<Ingredient> list) {
-        return list
-                .stream()
-                .min(Comparator.comparing(Ingredient::getQuantity))
-                .get().getQuantity();
-    }
-
     public List<IngredientInventory> divOfQuantityForSameInventory(List<IngredientInventory> listIngredient) {
         //ArrayList<Ingredient> result= new ArrayList<>();
         ArrayList<IngredientInventory> gradientInventories= new ArrayList<>();
@@ -398,14 +391,6 @@ public class RecipeController {
         }
 
         return gradientInventories;
-    }
-
-    public Integer divSameQuantity(List<Inventory> Inventorys, Inventory Inventory){
-        return Inventorys.stream()
-                .filter(customer -> Inventory.getName().equals(customer.getName()))
-                .map(x -> x.getQuantity())
-                .reduce(0, Integer::divideUnsigned);
-
     }
 
     public List<IngredientInventory> ifContainSameElement_(Collection<Inventory> listIngredient, ArrayList<IngredientInventory> gradientInventory) {
