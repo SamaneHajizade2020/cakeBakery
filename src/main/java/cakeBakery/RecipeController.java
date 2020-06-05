@@ -48,7 +48,7 @@ public class RecipeController {
     }
 
     @RequestMapping(value = "/recipes")
-    public ResponseEntity<Object> getProduct() {
+    public ResponseEntity<Object> getRecipeList() {
         return new ResponseEntity<>(recipeRepository.findAll(), HttpStatus.OK);
     }
 

@@ -1,0 +1,19 @@
+[
+  {
+    "recipeId": 3,
+    "name": "Pandora cake",
+    "instructions": "Same as cheese cake",
+    "ingredients": [
+      {
+        "name": "Suger",
+        "quantity": 1,
+        "recipe": null
+      },
+      {
+        "name": "vanilla",
+        "quantity": 2,
+        "recipe": null
+      }
+    ]
+  }
+]
