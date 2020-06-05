@@ -70,7 +70,33 @@ public class RecipeControllerTest extends AbstractTest {
         int status = mvcResult.getResponse().getStatus();
         assertEquals(201, status);
         String content = mvcResult.getResponse().getContentAsString();
-        //Recipe recipes = super.mapFromJson(content, Recipe.class);
+        System.out.println(content);
         assertEquals(content, "Product is created successfully");
+    }
+
+   // @Test
+    public void updateProduct() throws Exception {
+        String uri = "/products/3";
+        Recipe product = new Recipe();
+        product.setName("Lemon cake");
+        String inputJson = super.mapToJson(product);
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(inputJson)).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(200, status);
+        String content = mvcResult.getResponse().getContentAsString();
+        assertEquals(content, "Product is updated successsfully");
+    }
+
+    //@Test
+    public void deleteInventory() throws Exception {
+        String uri = "/recipes/3";
+        MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.delete(uri)).andReturn();
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(200, status);
+        String content = mvcResult.getResponse().getContentAsString();
+        assertEquals(content, "Product is deleted successsfully");
     }
 }
