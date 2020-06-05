@@ -22,7 +22,7 @@ public class InventoryController {
     public InventoryController(InventoryRepository repository){this.repository = repository;};
 
     @RequestMapping(value = "/inventory", method = RequestMethod.GET)
-    public ResponseEntity<Object> getInventory() {
+    public ResponseEntity<Object> getInventoryList() {
         List<Inventory> repositoryAll = repository.findAll();
         for (Inventory Inventory : repositoryAll) {
             if(Inventory.getQuantity() == 0)
