@@ -2,16 +2,28 @@ package com.tutorialspoint.mockitodemo;
 
 import cakeBakery.Ingredient;
 import cakeBakery.Recipe;
+import cakeBakery.RecipeNotFoundException;
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.tutorialspoint.mokitodemo.AbstractTest;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static junit.framework.TestCase.*;
 
@@ -56,7 +68,7 @@ public class RecipeControllerTest extends AbstractTest {
     public void createRecipe() throws Exception {
         String uri = "/recipes/create";
 
-        ArrayList< Ingredient > ingredients = new ArrayList<>();
+        ArrayList<Ingredient> ingredients = new ArrayList<>();
         Ingredient ingredient = new Ingredient("Suger", 4);
         ingredients.add(ingredient);
         Recipe recipe = new Recipe("Torta", "cream plus spomg", ingredients);
@@ -74,9 +86,9 @@ public class RecipeControllerTest extends AbstractTest {
         assertEquals(content, "Product is created successfully");
     }
 
-   // @Test
+    @Test
     public void updateProduct() throws Exception {
-        String uri = "/products/3";
+        String uri = "/products/7";
         Recipe product = new Recipe();
         product.setName("Lemon cake");
         String inputJson = super.mapToJson(product);
@@ -87,7 +99,7 @@ public class RecipeControllerTest extends AbstractTest {
         int status = mvcResult.getResponse().getStatus();
         assertEquals(200, status);
         String content = mvcResult.getResponse().getContentAsString();
-        assertEquals(content, "Product is updated successsfully");
+        assertEquals(content, "Product is updated successfully");
     }
 
     //@Test
@@ -97,6 +109,43 @@ public class RecipeControllerTest extends AbstractTest {
         int status = mvcResult.getResponse().getStatus();
         assertEquals(200, status);
         String content = mvcResult.getResponse().getContentAsString();
-        assertEquals(content, "Product is deleted successsfully");
+        assertEquals(content, "Product is deleted successfully");
     }
+
+    @Test
+    public void createRecipeYummy() throws Exception {
+        String uri = "/recipes/{id}/make";
+        String actual = "{\"name\": \"Chocolate Doughnuts\",\"instructions\": \"Melt chocolate, dip the Doughnut\",    \"ingredients\": []}";
+
+        JSONAssert.assertEquals(
+                "{\"name\": \"Chocolate Doughnuts\",\"instructions\": \"Melt chocolate, dip the Doughnut\",\"ingredients\": []}",
+                actual,
+                JSONCompareMode.LENIENT);
+
+        JSONAssert.assertNotEquals(
+                "{\"name\": \"Chocolate Doughnuts\",\"instructions\": \"Melt chocolate, dip the Doughnut\",\"ingredients\": [" +
+                        "{ \"name\": \"Chocolate\", \"quantity\": 0 },{ \"name\": \"Doughnut\", \"quantity\": 4 }]}",
+                actual,
+                JSONCompareMode.LENIENT);
+    }
+
+    @Test
+    public void getCountByRecipe() throws Exception {
+    String actual =
+            "[\n" +
+                    "    {\"id\":1, \"count\":11},\n" +
+                    "    {\"id\":2, \"count\":4},\n" +
+                    "    {\"id\":3, \"count\":1}\n" +
+                    "]";
+        JSONAssert.assertEquals(
+                "[\n"+
+                "    {\"id\":1, \"count\":11},\n"+
+                "    {\"id\":2, \"count\":4},\n"+
+                "    {\"id\":3, \"count\":1}\n"+
+                "]",
+    actual,
+    JSONCompareMode.LENIENT
+        );
+}
+
 }
