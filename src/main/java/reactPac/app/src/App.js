@@ -2,27 +2,28 @@ import React, { Component } from 'react';
 //import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import InventoryList from './components/inventorylist';
 
 class App extends Component {
   state = {
-    isLoading: true,
-   // groups: [],
-    inventories: []
+    inventory: []
   };
 
   async componentDidMount() {
     const response = await fetch('/inventory');
     const body = await response.json();
-   // this.setState({ groups: body});
-   this.setState({ inventories: body, isLoading: false });
+   this.setState({ inventory: body});
   }
 
   render() {
-    //const {groups} = this.state;
-    const {inventories, isLoading} = this.state;
+    const {inventory} = this.state;
+        return (
+                <InventoryList
+                            inventory={this.state.inventory}/>
+            );
 
-  return (
-    <div className="App">
+
+    /*<div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
 
@@ -32,13 +33,12 @@ class App extends Component {
               <div key={inventory.id}>
                 {inventory.name}
                 {inventory.quantity}
-
               </div>
             )}
           </div>
       </header>
     </div>
-  );
+  );*/
 }
 }
 
