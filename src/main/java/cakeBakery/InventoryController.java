@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,6 +64,19 @@ public class InventoryController {
         for (Inventory Inventory : all) {
             repository.delete(Inventory);
         }
+        return new ResponseEntity<>("Product is deleted successsfully", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/inventory/delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<Object> deleteById(@PathVariable("id") Long id) {
+
+        if(repository.findById(id) == null)
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "404"
+            );
+        Optional<Inventory> inventory = repository.findById(id);
+        repository.delete(inventory.get());
+
         return new ResponseEntity<>("Product is deleted successsfully", HttpStatus.OK);
     }
 
