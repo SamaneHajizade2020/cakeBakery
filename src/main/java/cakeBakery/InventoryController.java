@@ -32,7 +32,7 @@ public class InventoryController {
         return new ResponseEntity<>(repositoryAll, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/createInventory", method = RequestMethod.POST)
+/*    @RequestMapping(value = "/createInventory", method = RequestMethod.POST)
     public ResponseEntity<Object> createInventoryWithoutLimit(@RequestBody ArrayList<Inventory> Inventorys) {
         for (Inventory Inventory : Inventorys) {
             if(Inventory.getQuantity() <= 0) {
@@ -41,13 +41,13 @@ public class InventoryController {
             repository.save(Inventory);
         }
         return new ResponseEntity<>("Product is created successfully", HttpStatus.CREATED);
-    }
+    }*/
 
     @RequestMapping(value = "/inventory/fill", method = RequestMethod.POST)
     public ResponseEntity<Object> createInventory(@RequestBody ArrayList<Inventory> Inventorys) {
         for (Inventory Inventory : Inventorys) {
             if(Inventory.getQuantity() <= 0) {
-                return  new ResponseEntity<>("Rejected cause of zero or negative quantity", HttpStatus.NOT_ACCEPTABLE);
+                return  new ResponseEntity<>("Rejected cause of zero or negative quantity", HttpStatus.NO_CONTENT);
             }
         }
         for (Inventory Inventory : Inventorys) {

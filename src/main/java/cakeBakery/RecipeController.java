@@ -52,6 +52,28 @@ public class RecipeController {
         return new ResponseEntity<>(recipeRepository.findAll(), HttpStatus.OK);
     }
 
+
+    @RequestMapping(value = "/clear", method = RequestMethod.POST)
+    public ResponseEntity<Object> clearAll() {
+        List<Recipe> recipes = recipeRepository.findAll();
+        log.info( "Recipes size" + recipes.size());
+
+        List<Inventory> inventories = inventoryRepository.findAll();
+        log.info( "inventories size" + inventories.size());
+
+        if (!recipes.isEmpty()){
+            recipeRepository.deleteAll();
+            log.info( "Recipes size" + recipes.size());
+        }
+
+        if (!inventories.isEmpty()){
+            inventoryRepository.deleteAll();
+            log.info( "inventories size" + inventories.size());
+        }
+
+        return new ResponseEntity<>(" // N/A, i.e. status 204 No Content", HttpStatus.NO_CONTENT);
+    }
+
     @RequestMapping(value = "/recipe/{id}", method = RequestMethod.GET)
     public ResponseEntity<Object> getProductById(@PathVariable("id") Long id) {
         //if(recipeRepository.findById(id) == null)
@@ -88,7 +110,7 @@ public class RecipeController {
         for (Ingredient ingredient : ingredients) {
             ingredientRepository.delete(ingredient);
         }
-        return new ResponseEntity<>("Product is deleted successsfully", HttpStatus.OK);
+        return new ResponseEntity<>(" N/A, i.e. status 204 No Content", HttpStatus.NO_CONTENT);
     }
 
     @RequestMapping(value = "/recipes/create", method = RequestMethod.POST)
@@ -126,7 +148,7 @@ public class RecipeController {
             );
 
             replaceRecipeExceptId(partialUpdate, id);
-        return new ResponseEntity<Object>("Product is updated successsfully", HttpStatus.OK);
+        return new ResponseEntity<Object>(recipeRepository.findById(id), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/recipes/{id}/make", method = RequestMethod.POST)
