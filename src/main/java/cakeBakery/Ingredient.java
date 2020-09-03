@@ -12,7 +12,7 @@ import javax.persistence.*;
 public class Ingredient {
 
     private @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonIgnore()
     Long id;
 

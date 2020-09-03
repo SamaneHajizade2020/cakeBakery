@@ -1,6 +1,7 @@
 package cakeBakery;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +18,16 @@ import java.util.stream.Collectors;
 public class InventoryController {
     private final static Logger log = Logger.getLogger(InventoryController.class.getName());
 
-    @Autowired
+    @Autowired(required=true)
     InventoryRepository repository;
+
+    public InventoryRepository getRepository() {
+        return repository;
+    }
+
+    public void setRepository(InventoryRepository repository) {
+        this.repository = repository;
+    }
 
     public InventoryController(InventoryRepository repository){this.repository = repository;};
 

@@ -1,0 +1,3 @@
+CREATE TABLE recipe(id        INT unsigned NOT NULL AUTO_INCREMENT, name            VARCHAR(150) NOT NULL, instructions	  VARCHAR(150) NOT NULL, PRIMARY KEY     (id));
+CREATE TABLE inventory(id        INT unsigned NOT NULL AUTO_INCREMENT, name            VARCHAR(150) NOT NULL, quantity INT NOT NULL, PRIMARY KEY     (id));
+CREATE TABLE ingredient(id        INT unsigned NOT NULL AUTO_INCREMENT, name            VARCHAR(150) NOT NULL, quantity INT NOT NULL, PRIMARY KEY     (id));
